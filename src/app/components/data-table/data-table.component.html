@@ -1,0 +1,30 @@
+<div style="height: 700px;">
+  <header>
+    <h1 style="text-align: center;">Articles</h1>
+  </header>
+  <cdk-virtual-scroll-viewport itemSize="50" (scrolledIndexChange)="onScroll()">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Author ID</th>
+          <th>Author Age</th>
+          <th>Is New</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *cdkVirtualFor="let article of articles">
+          <td>{{ article.id }}</td>
+          <td>{{ article.title }}</td>
+          <td>{{ article.authorId }}</td>
+          <td>{{ article.authorAge }}</td>
+          <td>{{ article.isNew }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </cdk-virtual-scroll-viewport>
+</div>
+<footer>
+  <h2 style="text-align: center; text-color: white">this table has a virtual scroll</h2>
+</footer>

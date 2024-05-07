@@ -1,0 +1,34 @@
+.container {
+    display: flex;
+  }
+  
+  .authors {
+    width: 200px;
+    border-right: 1px solid #ccc;
+    padding: 10px;
+  }
+  
+  .authors ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .authors li {
+    cursor: pointer;
+  }
+  
+  .authors li.selected {
+    font-weight: bold;
+  }
+  
+  .articles {
+    flex: 1;
+    padding: 10px;
+  }
+  
+  .article-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+  }
