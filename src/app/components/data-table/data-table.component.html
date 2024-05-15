@@ -14,7 +14,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *cdkVirtualFor="let article of articles">
+        <tr *cdkVirtualFor="let article of articles$">
           <td>{{ article.id }}</td>
           <td>{{ article.title }}</td>
           <td>{{ article.authorId }}</td>

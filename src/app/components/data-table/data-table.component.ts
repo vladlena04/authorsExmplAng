@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
+import { Observable, of } from 'rxjs';
+import { concatMap, map } from 'rxjs/operators';
 
 interface Article {
   id: number;
@@ -19,10 +21,11 @@ interface Article {
 })
 
 export class DataTableComponent implements OnInit {
-  articles: Article[] = []; // Массив статей
-  currentIndex = 0; // Текущий индекс для отслеживания загруженных статей(строк)
-  pageSize = 100; // Количество статей, которые будет загружаться за один раз на страницу
-  nextId = 1; // Следующий id для новой статьи
+  articles$: Observable<Article[]> = new Observable();// Используем наблюдаемый объект для статей
+  currentIndex = 0;
+  pageSize = 100;
+  nextId = 1;
+
   authors = [
     { id: 1, name: 'Author1', age: 65 },
     { id: 2, name: 'Author2', age: 87 },
@@ -32,44 +35,58 @@ export class DataTableComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.generateRandomData();
+    this.getAuthors().pipe(
+      concatMap(authors => this.getArticles(authors))
+    ).subscribe(articles => {
+      this.articles$ = of(articles);
+    });
   }
 
-  generateRandomData(): void {
-    // Генерируем случайные данные для начальной загрузки
+  getAuthors(): Observable<{ id: number, name: string, age: number }[]> {
+    return of(this.authors);
+  }
+
+  getArticles(authors: { id: number, name: string, age: number }[]): Observable<Article[]> {
+    return of(this.generateRandomData(authors));
+  }
+
+  generateRandomData(authors: { id: number, name: string, age: number }[]): Article[] {
     const data: Article[] = [];
     for (let i = 0; i < this.pageSize; i++) {
-      data.push(...this.generateArticles());
+      data.push(...this.generateArticles(authors));
     }
-    this.articles = data;
+    return data;
   }
 
   loadMoreData(): void {
-    // Генерируем дополнительные данные при прокрутке
     const data: Article[] = [];
     for (let i = 0; i < this.pageSize; i++) {
-      data.push(...this.generateArticles());
+      data.push(...this.generateArticles(this.authors));
     }
-    this.currentIndex += this.pageSize; // Обновляем текущий индекс
-    this.articles = [...this.articles, ...data]; // Добавляем новые статьи к уже имеющемуся массиву
+    this.currentIndex += this.pageSize;
+    this.articles$.pipe(
+      map(articles => [...articles, ...data])
+    ).subscribe(updatedArticles => {
+      this.articles$ = of(updatedArticles);
+    });
   }
 
   onScroll(): void {
-    this.loadMoreData();
+      this.loadMoreData();
   }
 
-  private generateArticles(): Article[] {
+  private generateArticles(authors: { id: number, name: string, age: number }[]): Article[] {
     const articles: Article[] = [];
-    const authorId = Math.floor(Math.random() * 5) + 1; // Случайный id автора
-    const author = this.authors.find((a) => a.id === authorId); // Находим автора по id
-    const authorAge = author ? author.age : 0; // Получаем возраст автора, или 0, если автор не найден
-    if (authorAge > 50) { // Генерируем статью только если автору больше 50 лет
+    const authorId = Math.floor(Math.random() * authors.length) + 1;
+    const author = authors.find(a => a.id === authorId);
+    const authorAge = author ? author.age : 0;
+    if (authorAge > 50) {
       articles.push({
         id: this.nextId++,
         title: `Article ${this.nextId}`,
         authorId,
         authorAge,
-        isNew: Math.random() < 0.5, // Случайно определяем, является ли статья новой
+        isNew: Math.random() < 0.5,
       });
     }
     return articles;
